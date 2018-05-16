@@ -2,11 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	_ "github.com/mattn/go-sqlite3"
-	"net/http"
+	"github.com/pamost/todo/handlers"
 )
 
 func main() {
@@ -32,17 +31,10 @@ func main() {
 	}))
 
 	// Route => handler
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "Hi!")
-	})
-
-	e.GET("/id/:id", func(c echo.Context) error {
-		requested_id := c.Param("id")
-		fmt.Println(requested_id)
-		return c.JSON(http.StatusOK, requested_id)
-	})
-
-	e.GET("/get", func(c echo.Context) error { return c.JSON(200, "GET") })
+	e.File("/", "public/index.html")
+	e.GET("/todo", handlers.GetTodos(db))
+	e.PUT("/todo", handlers.PutTodo(db))
+	e.DELETE("/todo/:id", handlers.DeleteTodo(db))
 
 	e.Logger.Fatal(e.Start(":8000"))
 }
