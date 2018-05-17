@@ -32,11 +32,11 @@ func main() {
 
 	// Route => handler
 	e.File("/", "public/index.html")
-	e.GET("/todo", handlers.GetTodos(db))
-	e.PUT("/todo", handlers.PutTodo(db))
-	e.DELETE("/todo/:id", handlers.DeleteTodo(db))
+	e.GET("/jobs", handlers.GetJobs(db))
+	e.PUT("/job", handlers.PutJob(db))
+	e.DELETE("/job/:id", handlers.DeleteJob(db))
 
-	e.Logger.Fatal(e.Start(":8000"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
 
 func initDB(filepath string) *sql.DB {
@@ -57,7 +57,7 @@ func initDB(filepath string) *sql.DB {
 
 func migrate(db *sql.DB) {
 	sql := `
-    CREATE TABLE IF NOT EXISTS todo (
+    CREATE TABLE IF NOT EXISTS jobs (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         name VARCHAR NOT NULL
     );
