@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>TODO App</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+    <!-- JQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- Vue.js -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.7.0/vue-resource.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Мои уведомления</h2>
+            <ul class="list-group">
+                <li class="list-group-item" v-for="job in jobs">
+                {{ job.name }}
+                    <span class="pull-right">
+                        <button class="btn btn-xs btn-danger" v-on:click="deleteJob($index)">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </button>
+                    </span>
+                </li>
+            </ul>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Новое уведомление" v-on:keyup.enter="createJob" v-model="newJob.name">
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" type="button" v-on:click="createJob">Создать</button>
+                </span>
+            </div><!-- /input-group -->
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: 'body',
+
+        data: {
+            jobs: [],
+            newJob: {}
+        },
+
+        // This is run whenever the page is loaded to make sure we have a current job list
+        created: function() {
+            // Use the vue-resource $http client to fetch data from the /jobs route
+            this.$http.get('/jobs').then(function(response) {
+                this.jobs = response.data.items ? response.data.items : []
+            })
+        },
+
+        methods: {
+            createJob: function() {
+                if (!$.trim(this.newJob.name)) {
+                    this.newJob = {}
+                    return
+                }
+
+                // Post the new job to the /jobs route using the $http client
+                this.$http.put('/job', this.newJob).success(function(response) {
+                    this.newJob.id = response.created
+                    this.jobs.push(this.newJob)
+                    console.log("Job created!")
+                    console.log(this.newJob)
+                    this.newJob = {}
+                }).error(function(error) {
+                    console.log(error)
+                });
+            },
+
+            deleteJob: function(index) {
+                // Use the $http client to delete a job by its id
+                this.$http.delete('/job/' + this.jobs[index].id).success(function(response) {
+                    this.jobs.splice(index, 1)
+                    console.log("job deleted!")
+                }).error(function(error) {
+                    console.log(error)
+                })
+            }
+        }
+    })
+</script>
+
+</body>
+</html>
